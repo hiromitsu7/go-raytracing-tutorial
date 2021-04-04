@@ -33,6 +33,11 @@ func (v Vector) Normalize() Vector {
 }
 
 //##########################################################
+type Camera struct {
+	Position, Direction Vector
+}
+
+//##########################################################
 type Ray struct {
 	Origin, Direction Vector
 }
@@ -43,22 +48,58 @@ func (r Ray) Point(t float64) Vector {
 	return a.Add(b)
 }
 
-func (r Ray) HitSphere(s Sphere) bool {
+// 球に当たったか判定し、当たった場合は当たった点、法線ベクトルを返す
+func (r Ray) HitSphere(s Sphere) (bool, Vector, Vector) {
 	oc := r.Origin.Substruct(s.Center)
 	a := r.Direction.Dot(r.Direction)
-	b := oc.Dot(r.Direction)
+	b := 2.0 * oc.Dot(r.Direction)
 	c := oc.Dot(oc) - s.Radius*s.Radius
-	discriminant := b*b - a*c
-	return discriminant > 0
+	// 二次関数の頂点のy
+	discriminant := b*b - 4.0*a*c
+	hit := discriminant >= 0.0
+
+	if hit {
+		t1 := (-b - math.Sqrt(b*b-4.0*a*c)) / a / 2.0
+		hitPoint1 := r.Point(t1)
+		sub1 := hitPoint1.Substruct(r.Origin)
+		length21 := sub1.Dot(sub1)
+		normal1 := hitPoint1.Substruct(s.Center).Normalize()
+
+		t2 := (-b + math.Sqrt(b*b-4.0*a*c)) / a / 2.0
+		hitPoint2 := r.Point(t2)
+		sub2 := hitPoint2.Substruct(r.Origin)
+		length22 := sub2.Dot(sub2)
+		normal2 := hitPoint2.Substruct(s.Center).Normalize()
+
+		if length21 <= length22 {
+			return true, hitPoint1, normal1
+		} else {
+			return true, hitPoint2, normal2
+		}
+	} else {
+		return false, Vector{}, Vector{}
+	}
 }
 
 func (r Ray) Color() Vector {
-	sphere := Sphere{Center: Vector{0.0, 0.0, 1.0}, Radius: 0.5}
+	sphere := Sphere{Center: Vector{0.0, 0.0, 1.5}, Radius: 0.5}
 
-	if r.HitSphere(sphere) {
-		return Vector{1.0, 0.0, 0.0}
+	hit, hitPoint, normal := r.HitSphere(sphere)
+
+	// 球に当たった場合
+	if hit {
+		if math.Abs(hitPoint.X) < 0.01 && math.Abs(hitPoint.Y) < 0.01 {
+			fmt.Println(hitPoint)
+		}
+		return Vector{0.5*normal.Y + 0.5, 0.0, 0.0}
 	}
 
+	// 水平線上の場合の場合
+	if math.Abs(r.Origin.Y-r.Direction.Y) < 0.001 {
+		return Vector{0.0, 1.0, 0.0}
+	}
+
+	// 何も当たらなかった場合
 	unit := r.Direction.Normalize()
 	t := 0.5 * (unit.Y + 1.0)
 	white := Vector{1.0, 1.0, 1.0}
@@ -81,8 +122,8 @@ func check(e error, s string) {
 }
 
 func main() {
-	nx := 400
-	ny := 200
+	nx := 800
+	ny := 400
 
 	const color float64 = 255.99
 
