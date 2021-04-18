@@ -10,6 +10,6 @@ func (l Lambertian) Bounce(input Ray, hit Hit) (bool, Ray) {
 	return true, Ray{hit.Point, direction}
 }
 
-func (l Lambertian) Color() Vector {
+func (l Lambertian) Color(hitPoint Vector) Vector {
 	return l.C
 }

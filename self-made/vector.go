@@ -18,11 +18,15 @@ func (v Vector) MultiplyScalar(t float64) Vector {
 	return Vector{X: v.X * t, Y: v.Y * t, Z: v.Z * t}
 }
 
+func (v Vector) Multiply(v1 Vector) Vector {
+	return Vector{v.X * v1.X, v.Y * v1.Y, v.Z * v1.Z}
+}
+
 func (v Vector) Add(v1 Vector) Vector {
 	return Vector{X: v.X + v1.X, Y: v.Y + v1.Y, Z: v.Z + v1.Z}
 }
 
-func (v Vector) Substruct(v1 Vector) Vector {
+func (v Vector) Substract(v1 Vector) Vector {
 	return Vector{X: v.X - v1.X, Y: v.Y - v1.Y, Z: v.Z - v1.Z}
 }
 

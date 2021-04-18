@@ -9,7 +9,7 @@ type Sphere struct {
 }
 
 func (s *Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, Hit) {
-	oc := r.Origin.Substruct(s.Center)
+	oc := r.Origin.Substract(s.Center)
 	a := r.Direction.Dot(r.Direction)
 	b := 2.0 * oc.Dot(r.Direction)
 	c := oc.Dot(oc) - s.Radius*s.Radius
@@ -28,7 +28,7 @@ func (s *Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, Hit) {
 		if tMin < t1 && t1 < tMax {
 			hit.T = t1
 			hitPoint := r.Point(t1)
-			normal := hitPoint.Substruct(s.Center).Normalize()
+			normal := hitPoint.Substract(s.Center).Normalize()
 			hit.Normal = normal
 			hit.Point = hitPoint
 			return true, hit
